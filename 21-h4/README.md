@@ -2,9 +2,10 @@ We start app:
 
 ```shell
 $ go run ./cmd/web 
-
+```
 To test app:
 
+```shell
 $ curl http://localhost:8080/list
 shoes: $50.00
 socks: $5.00
