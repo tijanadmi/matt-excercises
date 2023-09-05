@@ -1,3 +1,5 @@
+/****  Simple example with timeout  ***/
+
 package main
 
 import (
@@ -25,20 +27,22 @@ func get(url string, ch chan<- result) {
 	}
 }
 
+const tickRate = 2 * time.Second
+
 func main() {
-	results := make(chan result) // channel for results
+	stopper := time.After(5 * time.Second) // After funkcija koja vraca chan tj. vreca poruku kada definisano vreme istekne
+	results := make(chan result)           // channel for results
 	list := []string{"https://amazon.com", "https://google.com", "https://nytimes.com", "https://wsj.com"}
 
 	for _, url := range list {
 		go get(url, results) // start a CSP process
 	}
-
 	for range list { // read from the channel
-		r := <-results
-		if r.err != nil {
-			log.Printf("%-20s %s\n", r.url, r.err)
-		} else {
+		select {
+		case r := <-results:
 			log.Printf("%-20s %s\n", r.url, r.latency)
+		case t := <-stopper: // kad primimo informaciju od stopera ispisujemo timeout
+			log.Fatalf("timeout %s", t)
 		}
 	}
 }
